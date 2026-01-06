@@ -35,6 +35,9 @@ The pipeline is designed to be agnostic and handles a wide variety of formats fo
 - **Documents**:
   - Word Documents (`.docx`) - *Extracts text content*
   - PDF (`.pdf`) - *Extracts text content*
+- **Diagrams**:
+  - Draw.io (`.drawio`, `.dtmp`) - *Extracts labels and structure from XML (including compressed files)*
+  - Microsoft Visio (`.vsdx`) - *Extracts text from page XMLs*
 - **Images (OCR)**:
   - Screenshots/Diagrams (`.png`, `.jpg`, `.jpeg`, `.tiff`, `.bmp`) - *Uses Tesseract OCR to extract text/code from images*
 
