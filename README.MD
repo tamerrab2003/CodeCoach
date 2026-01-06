@@ -2,6 +2,44 @@
 
 This project provides a complete pipeline to train a **Tiny Recursive Model (TRM)** on your local codebase logic and deploy it as a VS Code agent. The goal is to create a model that understands the *reasoning* behind your code, not just the syntax.
 
+## Concept & Architecture
+
+### The Model: TRM
+The **Tiny Recursive Model (TRM)** is an efficient, compact architecture designed to process sequences with recursive depth. Unlike massive LLMs, TRM is optimized to run locally on consumer hardware (like Apple Silicon) while maintaining the ability to capture complex logical dependencies in code.
+
+### The Pipeline: Distillation & Training
+We use a "Teacher-Student" distillation approach:
+1.  **Teacher Model (`deepseek-r1:1.5b`)**: A capable, larger model (running via Ollama) analyzes your source code. It generates "Chain-of-Thought" (CoT) reasoning—explaining *why* the code works the way it does.
+2.  **Data Generation**: The `generate_data.py` script scans your workspace, feeds code to the teacher, and captures the (Input Code -> Reasoning -> Output Explanation) triplets.
+3.  **Student Model (TRM)**: We train the TRM on this distilled dataset. The TRM learns to mimic the teacher's reasoning capabilities but in a much smaller, faster package specialized for your specific codebase.
+4.  **Inference**: The trained TRM is served via a local MCP server, allowing your IDE (VS Code) to consult it for code explanations and logic tracing.
+
+## Supported File Types & Capabilities
+
+The pipeline is designed to be agnostic and handles a wide variety of formats found in modern development workspaces:
+
+- **Code & Scripts**:
+  - Python (`.py`)
+  - JavaScript/TypeScript (`.js`, `.ts`, `.tsx`, `.jsx`) - *Includes type-aware prompts*
+  - Java (`.java`)
+  - Go (`.go`)
+  - C/C++ (`.c`, `.cpp`, `.h`)
+  - Rust (`.rs`)
+  - Shell Scripts (`.sh`, `.bash`)
+- **Web & Config**:
+  - HTML/HTMLx (`.html`, `.htm`)
+  - CSS/SCSS (`.css`, `.scss`)
+  - JSON (`.json`)
+  - XML/XSLT (`.xml`, `.xslt`)
+  - YAML (`.yaml`, `.yml`)
+- **Documents**:
+  - Word Documents (`.docx`) - *Extracts text content*
+  - PDF (`.pdf`) - *Extracts text content*
+- **Images (OCR)**:
+  - Screenshots/Diagrams (`.png`, `.jpg`, `.jpeg`, `.tiff`, `.bmp`) - *Uses Tesseract OCR to extract text/code from images*
+
+*Note: The generator recursively scans directories and ignores binary/hidden files automatically.*
+
 ## Prerequisites
 
 - **Mac with Apple Silicon (M1/M2/M3)** recommended for MLX.
