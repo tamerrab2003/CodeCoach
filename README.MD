@@ -100,22 +100,23 @@ Expose your trained model to VS Code using the Model Context Protocol (MCP). Thi
     - These extensions let you register local MCP servers and call their tools from VS Code.
 
 4.  **Configure the MCP server in VS Code**:
-    Add a server entry to your MCP extension configuration (User Settings or the extension’s `mcp-servers.json`). Use absolute paths:
+    Add a server entry to your MCP extension configuration (User Settings or the extension’s `mcp-servers.json`). **Replace `/absolute/path/to/CodeCoach` with the actual full path to this directory on your machine.**
 
     ```json
     {
       "mcpServers": {
         "local-trm": {
-          "command": "/Users/tamer.awad/workspaces/ai agents/CodeCoach/.venv/bin/python3",
-          "args": ["/Users/tamer.awad/workspaces/ai agents/CodeCoach/agent_server.py"],
-          "cwd": "/Users/tamer.awad/workspaces/ai agents/CodeCoach",
+          "command": "/absolute/path/to/CodeCoach/.venv/bin/python3",
+          "args": ["/absolute/path/to/CodeCoach/agent_server.py"],
+          "cwd": "/absolute/path/to/CodeCoach",
           "env": {
-            "PYTHONPATH": "/Users/tamer.awad/workspaces/ai agents/CodeCoach/trm-agent"
+            "PYTHONPATH": "/absolute/path/to/CodeCoach/trm-agent"
           }
         }
       }
     }
     ```
+    *Tip: You can get the absolute path by running `pwd` in your terminal inside the project folder.*
     Notes:
     - `command` points to your virtualenv Python.
     - `args` launches the server script.
