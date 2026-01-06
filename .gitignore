@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Data
+data/*.jsonl
+data/*.txt
+# Keep the data directory
+!data/.keep
+
+# System
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Weights
+*.pt
+*.pth
+*.safetensors

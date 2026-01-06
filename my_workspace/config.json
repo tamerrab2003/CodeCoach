@@ -1,0 +1,9 @@
+{
+    "app_name": "CodeCoach",
+    "version": "1.0.0",
+    "features": {
+        "training": true,
+        "inference": true,
+        "supported_languages": ["python", "java", "json", "xslt"]
+    }
+}
