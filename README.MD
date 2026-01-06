@@ -171,3 +171,23 @@ Expose your trained model to VS Code using the Model Context Protocol (MCP). Thi
 - `generate_data.py`: Script to create dataset.
 - `agent_server.py`: MCP server script.
 - `my_workspace/`: Sample code for training.
+
+## References & Dependent Projects
+
+This project stands on the shoulders of giants. We utilize several key open-source technologies:
+
+### Core Architecture
+- **MLX-TRM**: [https://github.com/stockeh/mlx-trm](https://github.com/stockeh/mlx-trm)
+  *The core implementation of the Tiny Recursive Model for Apple Silicon.*
+- **DeepSeek-R1**: [https://github.com/deepseek-ai/DeepSeek-LLM](https://github.com/deepseek-ai/DeepSeek-LLM)
+  *The "Teacher" model used for Chain-of-Thought distillation.*
+
+### Infrastructure
+- **Ollama**: [https://ollama.com/](https://ollama.com/)
+  *Local inference runtime for serving the teacher model.*
+- **Model Context Protocol (MCP)**: [https://modelcontextprotocol.io/](https://modelcontextprotocol.io/)
+  *Standard protocol for connecting AI models to IDEs like VS Code.*
+
+### Papers & Inspiration
+- **"Tiny Recursive Models for Code Understanding"** (Conceptual basis for this architecture)
+- **"Distilling Reasoning Capabilities from Large Language Models"** (Methodology for the teacher-student pipeline)

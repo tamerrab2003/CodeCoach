@@ -5,6 +5,11 @@ from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 import multiprocessing
+import zipfile
+import zlib
+import base64
+import re
+from urllib.parse import unquote
 
 # Import optional dependencies for document processing
 try:
@@ -125,6 +130,60 @@ def extract_text_from_file(file_path):
                     # fallback to raw text
                     return xml_txt
             return xml_txt
+        elif ext in ('.drawio', '.dtmp'):
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # Check if it's a compressed mxfile
+                if '<mxfile' in content:
+                    # Simple regex to find diagram data if compressed
+                    # Often structure is <diagram ...>BASE64</diagram>
+                    # But if it's plain XML, we just return it.
+                    if 'compressed="false"' in content:
+                        return content
+                    
+                    # Try to extract base64 payload from <diagram> tag
+                    match = re.search(r'<diagram[^>]*>(.*?)</diagram>', content, re.DOTALL)
+                    if match:
+                        b64_data = match.group(1).strip()
+                        try:
+                            # Draw.io compression: Base64 -> Inflate (no header) -> URL Decode
+                            # Actually usually: Deflate -> Base64.
+                            # Standard draw.io: Raw Deflate (no zlib header)
+                            compressed = base64.b64decode(b64_data)
+                            try:
+                                xml_data = zlib.decompress(compressed, -15) # -15 for raw deflate
+                            except:
+                                xml_data = zlib.decompress(compressed)
+                            
+                            return unquote(xml_data.decode('utf-8'))
+                        except Exception:
+                            # Fallback to returning raw content if decompression fails
+                            pass
+                return content
+            except Exception:
+                return None
+
+        elif ext == '.vsdx':
+            # Visio is a ZIP of XMLs. Extract text from page XMLs.
+            try:
+                text_content = []
+                with zipfile.ZipFile(file_path, 'r') as z:
+                    for name in z.namelist():
+                        if name.startswith('visio/pages/page') and name.endswith('.xml'):
+                            xml_data = z.read(name).decode('utf-8', errors='ignore')
+                            # Simple XML tag stripping to get text
+                            # Visio text is often in <v:text> or <a:t>
+                            # We'll just strip all tags for simplicity
+                            text = re.sub(r'<[^>]+>', ' ', xml_data)
+                            text = re.sub(r'\s+', ' ', text).strip()
+                            if text:
+                                text_content.append(f"--- Page {name} ---\n{text}")
+                return "\n".join(text_content)
+            except Exception:
+                return f"[Error reading VSDX file: {os.path.basename(file_path)}]"
+
         elif ext in ('.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.tiff'):
             if Image is not None and pytesseract is not None:
                 try:
@@ -161,6 +220,8 @@ def generate_reasoning_sample(filename, content, file_type):
         header += "Note: React JSX/TSX component. Consider props/state, event flow, and component structure.\n"
     if file_type == 'JAVASCRIPT' and ext == '.ts':
         header += "Note: TypeScript file. Consider types, interfaces, generics, and compile-time constraints.\n"
+    if file_type == 'DIAGRAM':
+        header += "Note: Diagram file (Visio/Draw.io). The content is XML representing shapes and connections. Focus on the flow, hierarchy, and labels.\n"
     prompt = f"""
     {header}
     Analyze the following file: {filename}
